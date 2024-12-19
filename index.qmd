@@ -5,7 +5,7 @@ format:
   dashboard:
     scrolling: true
     logo: images/logo.jpg
-    embed-resources: false
+    embed-resources: true
     nav-buttons: [github]
     github: https://github.com/GlennDeLange
 theme: lux
@@ -346,4 +346,5 @@ By visualizing these key metrics, this dashboard aims to raise awareness of colo
 
 To learn more about colorectal cancer and its impact, watch this informative video:
 
-<iframe width="734" height="413" src="https://www.youtube.com/embed/8P8aIxudUk8" title="What Are the Symptoms of Colorectal Cancer?" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+{{< video "https://www.youtube.com/embed/8P8aIxudUk8" title='What Are the Symptoms of Colorectal Cancer?'
+>}}
