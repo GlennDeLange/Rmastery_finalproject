@@ -1,7 +1,0 @@
-"0","value_box("
-"0","  title = ""Minimum Incidence (2019)"","
-"0","  value = round(min_incidence_2019, 2),"
-"0","  showcase = bsicons::bs_icon(""graph-down""),"
-"0","  theme = value_box_theme(bg = ""#FFCF4CFC""),"
-"0","   p(paste0(""("", min_incidence_country, "", "", ""per 100,000"","")""))"
-"0",")"
