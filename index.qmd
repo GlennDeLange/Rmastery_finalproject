@@ -346,5 +346,5 @@ By visualizing these key metrics, this dashboard aims to raise awareness of colo
 
 To learn more about colorectal cancer and its impact, watch this informative video:
 
-{{< video "https://www.youtube.com/embed/8P8aIxudUk8" title='What Are the Symptoms of Colorectal Cancer?'
+{{< video "https://www.youtube.com/embed/8P8aIxudUk8" title='What Are the Symptoms of Colorectal Cancer?' width="500" height="250"
 >}}
