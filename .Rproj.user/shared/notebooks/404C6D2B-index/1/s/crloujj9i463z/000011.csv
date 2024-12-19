@@ -1,0 +1,7 @@
+"0","value_box("
+"0","  title = ""Maximum Incidence (2019)"","
+"0","  value = round(max_incidence_2019, 2),"
+"0","  showcase = bsicons::bs_icon(""graph-up""),"
+"0","  theme = value_box_theme(bg = ""#FF5F3B""),"
+"0","  p(paste0(""("", max_incidence_country, "", "", ""per 100,000"","")""))"
+"0",")"

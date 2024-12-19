@@ -1,0 +1,7 @@
+"0","value_box("
+"0","  title = ""Highest Life Expectancy"","
+"0","  value = highest_life_exp_value,"
+"0","  showcase = bsicons::bs_icon(""heart""),"
+"0","  theme = value_box_theme(bg = ""#518fd6""),"
+"0","  p(paste0(""("", highest_life_exp_country, "")""))"
+"0",")"

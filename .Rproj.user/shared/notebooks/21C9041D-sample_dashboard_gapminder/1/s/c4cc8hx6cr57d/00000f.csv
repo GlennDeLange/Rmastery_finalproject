@@ -1,0 +1,7 @@
+"0","value_box("
+"0","  title = ""Lowest Life Expectancy"","
+"0","  value = lowest_life_exp_value,"
+"0","  showcase = bsicons::bs_icon(""thermometer""),"
+"0","  theme = value_box_theme(bg = ""#214773""),"
+"0","  p(paste0(""("", lowest_life_exp_country, "")""))"
+"0",")"

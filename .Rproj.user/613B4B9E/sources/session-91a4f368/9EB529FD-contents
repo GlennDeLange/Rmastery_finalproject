@@ -1,0 +1,347 @@
+---
+title: "Colorectal Cancer Incidence Trends between 1990-2019"
+author: "Glenn De Lange"
+format: 
+  dashboard:
+    scrolling: true
+    logo: images/logo.jpg
+    embed-resources: true
+theme: lux
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r, include=FALSE}
+# Load packages 
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, 
+               here,
+               sf,
+               bslib, 
+               bsicons,
+               rnaturalearth, 
+               plotly, 
+               countrycode, 
+               htmltools, 
+               reactable,
+               janitor,
+               gapminder,
+               shiny,
+               sparkline
+               )
+```
+
+```{r}
+# Load colorectal cancer incidence data
+colorectal_cancer <- readr::read_csv(here("data", "colonandrectum_cancer_new_cases_per_100000_men.csv"))
+
+# Reshape data to long format, and filter to only take data from 1990 on
+colorectal_long <- colorectal_cancer %>%
+  pivot_longer(cols = -country, names_to = "year", values_to = "incidence") %>%
+  mutate(year = as.integer(year)) %>%
+  drop_na(incidence) %>%
+  filter(year >= 1990)
+
+# with the package country codes, add region
+colorectal_long <- colorectal_long %>%
+  mutate(region = countrycode(country, origin = "country.name", destination = "region"))
+
+# Filter data for 2019 and onwards
+colorectal_2019 <- colorectal_long %>%
+  filter(year == 2019)
+
+# Calculate key metrics
+
+# Which country has the maximum incidence?
+max_incidence_2019 <- max(colorectal_2019$incidence, na.rm = TRUE)
+max_incidence_country <- colorectal_2019$country[which.max(colorectal_2019$incidence)]
+
+# Which country has the minimum incidence?
+min_incidence_2019 <- min(colorectal_2019$incidence, na.rm = TRUE)
+min_incidence_country <- colorectal_2019$country[which.min(colorectal_2019$incidence)]
+
+#Worldwide average incidence
+avg_incidence_2019 <- mean(colorectal_2019$incidence, na.rm = TRUE)
+
+# Calculate the average incidence per region in 2019
+regional_avg_2019 <- colorectal_2019 %>%
+  group_by(region) %>%
+  summarize(avg_incidence = mean(incidence, na.rm = TRUE), .groups = "drop")
+```
+
+# HOME
+
+## Row 1 {height="26%"}
+
+```{r}
+value_box(
+  title = "Maximum Incidence (2019)",
+  value = round(max_incidence_2019, 2),
+  showcase = bsicons::bs_icon("graph-up"),
+  theme = value_box_theme(bg = "#FF5F3B"),
+  p(paste0("(", max_incidence_country, ", ", "per 100,000",")"))
+)
+```
+
+```{r}
+value_box(
+  title = "Minimum Incidence (2019)",
+  value = round(min_incidence_2019, 2),
+  showcase = bsicons::bs_icon("graph-down"),
+  theme = value_box_theme(bg = "#FFCF4CFC"),
+   p(paste0("(", min_incidence_country, ", ", "per 100,000",")"))
+)
+```
+
+```{r}
+# Prepare global average incidence data
+global_avg_data <- colorectal_long %>%
+  group_by(year) %>%
+  summarise(global_avg_incidence = mean(incidence, na.rm = TRUE), .groups = "drop")
+
+
+# Generate Sparkline
+sparkline_widget <- htmltools::div(
+  sparkline::sparkline(
+    round(global_avg_data$global_avg_incidence, 1),
+    type = "line",
+    width = "100px",
+    height = "100px",
+    lineColor = "black",
+    fillColor = FALSE,
+    spotColor = "#FF5F3B",
+    minSpotColor = "#4CAF50",
+    maxSpotColor = "#FF2B00",
+    highlightLineColor = "black",
+    highlightSpotColor = "black",
+    tooltipSuffix = " per 100,000",
+    xValues = global_avg_data$year, # Pass years explicitly as x-values
+    lineWidth = 2,
+    spotRadius = 3,
+    chartRangeMax = max(global_avg_data$global_avg_incidence, na.rm = TRUE),
+    chartRangeMin = min(global_avg_data$global_avg_incidence, na.rm = TRUE),
+    axis = TRUE, # Enable axes
+    xAxisPosition = "bottom", # Position for the x-axis
+    yAxisPosition = "left"   # Position for the y-axis
+  )
+)
+# Embed sparkline in the value box
+value_box(
+  title = "Average Incidence Worldwide (2019)",
+  value = paste(round(avg_incidence_2019, 2)),
+  showcase = sparkline_widget,
+  theme = value_box_theme(bg = "#FF8438"),
+     p(paste0("<- Variation between 1990-2019"))
+)
+```
+
+## Row 2 {height="37%"}
+
+###  {width="40%"}
+
+```{r}
+# Incidence by Country - Top 20 (2019)
+top_20_countries_2019 <- colorectal_2019 %>%
+  group_by(country) %>%
+  summarise(incidence = mean(incidence, na.rm = TRUE)) %>%
+  arrange(desc(incidence)) %>%
+  mutate(tooltip_label = paste(country, 
+                               round(incidence, 1), 
+                               sep = ": ")) %>% 
+  slice(1:5)
+
+# Create the plot
+ggplot_top20_2019 <- ggplot(top_20_countries_2019, aes(y = fct_reorder(country, incidence), x = incidence, text = tooltip_label)) +
+  geom_col(fill = "#FF5C33FD") +
+  labs(title = "Top 5 by Incidence (2019)",
+       y = "Country",
+       x = "Average Incidence (per 100,000)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Display the plot
+ggplotly_top20_2019 <- ggplotly(ggplot_top20_2019, tooltip = "text")
+
+ggplotly_top20_2019
+
+```
+
+###  {width="60%"}
+
+```{r}
+# Get min and max incidence for standardized scale
+min_incidence <- min(colorectal_long$incidence, na.rm = TRUE)
+max_incidence <- max(colorectal_long$incidence, na.rm = TRUE)
+
+# Important note : here we didn't need to standardise country names with iso codes as we didn't merge datasets
+
+# Create the animated choropleth map
+animated_map <- plot_geo(
+  data = colorectal_long,
+  locationmode = "country names"  # Match country names in your dataset to map
+) %>%
+  add_trace(
+    z = ~incidence,
+    zmin = min_incidence,    # Set scale's minimum
+    zmax = max_incidence,    # Set scale's maximum
+    locations = ~country,
+    color = ~incidence,
+    frame = ~year,           # Use year as the animation frame
+    colorscale = list(c(0, "yellow"), c(1, "red")),
+    text = ~paste(
+      "Country: ", country,
+      "<br>Year: ", year,
+      "<br>Incidence: ", round(incidence, 2)
+    ),                      # Add hover text
+    hoverinfo = "text"
+  ) %>%
+  layout(
+    title = "Colorectal Cancer Incidence by Country (1990-2019)",
+    geo = list(
+      showframe = FALSE,
+      showcoastlines = TRUE,
+      projection = list(type = "equirectangular")
+    )
+  )
+
+# Display the animated map
+animated_map
+
+```
+
+## Row 3 {height="37%"}
+
+###  {width="40%"}
+
+```{r}
+# Average Incidence by Region (2019)
+top_regions_2019 <- colorectal_2019 %>%
+  group_by(region) %>%
+  summarise(average_incidence = mean(incidence, na.rm = TRUE)) %>%
+  arrange(desc(average_incidence)) %>%
+  mutate(tooltip_label = paste(region, 
+                               round(average_incidence, 1), 
+                               sep = ": "))
+
+# Rename the regions to something shorter
+top_regions_2019$region <- recode(top_regions_2019$region, 
+                                  "North America" = "N. America",
+                                  "Europe & Central Asia" = "Europe",
+                                  "East Asia & Pacific" = "E. Asia",
+                                  "Latin America & Caribbean" = "L. America",
+                                  "Middle East & North Africa" = "M. East",
+                                  "Sub-Saharan Africa" = "S. Africa",
+                                  "South Asia" = "S. Asia")
+
+# Create the plot
+ggplot_top_regions_2019 <- ggplot(top_regions_2019, aes(y = fct_reorder(region, average_incidence), x = average_incidence, text = tooltip_label)) +
+  geom_col(fill = "#FFCF4CFC") +
+  labs(title = "Incidence by Region (2019)",
+       y = "Region",
+       x = "Average Incidence (per 100,000)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Display the plot (interactive tooltip with ggplotly)
+plotly::ggplotly(ggplot_top_regions_2019, tooltip = "text")
+```
+
+###  {width="60%"}
+
+```{r}
+#Create a chloropleth map of CRC in Europe in 2019
+# Filter data for Europe in 2019
+europe_2019 <- colorectal_2019 %>%
+  mutate(continent = countrycode(country, "country.name", "continent")) %>%
+  filter(continent == "Europe")
+
+# Rename missing countries
+europe_2019 <- europe_2019 %>%
+  mutate(country = recode(country, !!!setNames(c("Czechia", "Slovakia", "United Kingdom", "Bosnia and Herz."), c("Czech Republic", "Slovak Republic", "UK", "Bosnia and Herzegovina"))))
+
+# Get spatial data for Europe (excluding Russia's non-European part and irrelevant islands)
+europe_map <- rnaturalearth::ne_countries(scale = "medium", returnclass = "sf") %>%
+  filter(region_un == "Europe" & !sovereignt %in% c("Russia", "Turkey")) %>%
+  st_crop(xmin = -20, xmax = 40, ymin = 32, ymax = 65)
+
+# Merge the map data with incidence data
+europe_merged <- europe_map %>%
+  left_join(europe_2019, by = c("name" = "country"))
+
+# Create a tooltip column
+europe_merged <- europe_merged %>%
+  mutate(tooltip = paste0(
+    "<b>", name, "</b><br>",
+    "Incidence: ", round(incidence, 1), " per 100,000"
+  ))
+
+# Create the interactive map
+interactive_map <- ggplot(europe_merged) +
+  geom_sf(aes(fill = incidence, text = tooltip), color = "black", size = 0.2) +
+  scale_fill_gradient(name = "CRC Incidence\n(per 100,000)", 
+                      low = "#FFCF4CFC", high = "#FF2B00", na.value = "grey90") +
+  labs(title = "Colorectal Cancer Incidence in Europe (2019)",
+       subtitle = "Data shows new cases per 100,000 men",
+       caption = "Source: Your Data Source") +
+  theme_void() +
+  theme(legend.position = "right",
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 12),
+        axis.text = element_blank(),
+        axis.ticks = element_blank())
+
+
+# Convert ggplot to an interactive plot using plotly
+plotly_map <- plotly::ggplotly(interactive_map, tooltip = "text")
+
+# Display the interactive map
+plotly_map
+```
+
+# DOWNLOAD DATA
+
+```{r message=FALSE}
+htmltools::browsable(
+  tagList(
+    reactable(colorectal_long, 
+              elementId = "colorectal_incidence_table", 
+              searchable = TRUE, 
+              filterable = TRUE), 
+    
+tags$button("Download as CSV", 
+            onclick = "Reactable.downloadDataCSV('colorectal_incidence_table')")
+  )
+)
+```
+
+# ABOUT
+
+This dashboard provides an in-depth analysis of colorectal cancer incidence across different countries from 1990 to 2019. By exploring global trends and regional variations, it offers valuable insights into how the incidence of colorectal cancer has evolved over time.
+
+Key highlights:
+
+-   **Maximum Incidence**: The highest incidence rate observed in 2019 was `r paste(max_incidence_country,", at",  round(max_incidence_2019, 2))` cases per 100,000 people. This indicates a significant concentration of colorectal cancer cases in certain countries.
+
+-   **Minimum Incidence**: On the other hand, the lowest incidence rate in 2019 was `r paste(min_incidence_country,", at", round(min_incidence_2019, 2))`, showing areas where colorectal cancer is less prevalent.
+
+-   **Average Incidence**: The global average incidence of colorectal cancer in 2019 is `r paste(round(avg_incidence_2019, 2))`cases per 100,000 people, providing a reference point for comparing individual countries and regions.
+
+Trends Over Time: This dashboard also highlights how the incidence of colorectal cancer has shifted over the years, taking into account changes in healthcare, lifestyle factors, and advancements in detection and prevention. The interactive charts and maps allow users to explore these trends at the global, regional, and country levels.
+
+Data Source: The data used in this analysis comes from the **Global Cancer Observatory (GCO)**, which provides cancer statistics from 185 countries. The dataset includes newly diagnosed cases of colorectal cancer per 100,000 men, offering a global perspective on this common cancer type.
+
+Key Insights: 
+
+-   The interactive maps and charts enable users to identify the countries with the highest and lowest incidence rates.
+
+-   The sparkline widget provides a visual representation of global average trends over time, showing how the incidence has changed between 1990 and 2019.
+
+-   Regional breakdowns allow for comparison across continents, highlighting specific areas that may require more attention in terms of healthcare and cancer prevention.
+
+By visualizing these key metrics, this dashboard aims to raise awareness of colorectal cancer trends and promote public health initiatives targeted at reducing the incidence of this disease globally.
+
+To learn more about colorectal cancer and its impact, watch this informative video:
+
+<iframe width="734" height="413" src="https://www.youtube.com/embed/8P8aIxudUk8" title="What Are the Symptoms of Colorectal Cancer?" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
