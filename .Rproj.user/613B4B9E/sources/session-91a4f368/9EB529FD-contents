@@ -5,9 +5,9 @@ format:
   dashboard:
     scrolling: true
     logo: images/logo.jpg
+    embed-resources: true
     nav-buttons: [github]
     github: https://github.com/GlennDeLange
-    toc: true
 theme: lux
 execute:
   echo: false
@@ -336,11 +336,11 @@ Data Source: The data used in this analysis comes from the **Global Cancer Obser
 
 Key Insights: 
 
--   The interactive maps and charts enable users to identify the countries with the highest and lowest incidence rates.
+-   The highest incidence in CRC seems to be in the Northern hemisphere. This could be due to the fact that the Western lifestyle is more prevalent in these countries, but also that the implementation of screening programmes is more widespread.
 
--   The sparkline widget provides a visual representation of global average trends over time, showing how the incidence has changed between 1990 and 2019.
+-   The sparkline widget provides a visual representation of global average trends over time, showing how the incidence has drastically increased between 1990 and 2019.
 
--   Regional breakdowns allow for comparison across continents, highlighting specific areas that may require more attention in terms of healthcare and cancer prevention.
+-   Regional breakdowns allow for comparison across continents, highlighting specific areas (Europe, North America) that may require more attention in terms of healthcare and cancer prevention.
 
 By visualizing these key metrics, this dashboard aims to raise awareness of colorectal cancer trends and promote public health initiatives targeted at reducing the incidence of this disease globally.
 
