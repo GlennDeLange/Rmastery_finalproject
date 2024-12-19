@@ -5,10 +5,9 @@ format:
   dashboard:
     scrolling: true
     logo: images/logo.jpg
-    embed-resources: true
+    embed-resources: false
     nav-buttons: [github]
     github: https://github.com/GlennDeLange
-    toc: true
 theme: lux
 execute:
   echo: false
@@ -329,7 +328,7 @@ Key highlights:
 
 -   **Minimum Incidence**: On the other hand, the lowest incidence rate in 2019 was `r paste(min_incidence_country,", at", round(min_incidence_2019, 2))` cases per 100,000 people, showing areas where colorectal cancer is less prevalent.
 
--   **Average Incidence**: The global average incidence of colorectal cancer in 2019 is `r paste(round(avg_incidence_2019, 2))`cases per 100,000 people, providing a reference point for comparing individual countries and regions.
+-   **Average Incidence**: The global average incidence of colorectal cancer in 2019 is `r paste(round(avg_incidence_2019, 2))` cases per 100,000 people, providing a reference point for comparing individual countries and regions.
 
 Trends Over Time: This dashboard also highlights how the incidence of colorectal cancer has shifted over the years, taking into account changes in healthcare, lifestyle factors, and advancements in detection and prevention. The interactive charts and maps allow users to explore these trends at the global, regional, and country levels.
 
