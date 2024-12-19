@@ -8,6 +8,7 @@ format:
     embed-resources: true
     nav-buttons: [github]
     github: https://github.com/GlennDeLange
+    toc: true
 theme: lux
 execute:
   echo: false
