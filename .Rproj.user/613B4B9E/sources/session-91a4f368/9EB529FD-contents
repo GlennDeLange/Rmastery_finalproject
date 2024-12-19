@@ -324,7 +324,7 @@ Key highlights:
 
 -   **Maximum Incidence**: The highest incidence rate observed in 2019 was `r paste(max_incidence_country,", at",  round(max_incidence_2019, 2))` cases per 100,000 people. This indicates a significant concentration of colorectal cancer cases in certain countries.
 
--   **Minimum Incidence**: On the other hand, the lowest incidence rate in 2019 was `r paste(min_incidence_country,", at", round(min_incidence_2019, 2))`, showing areas where colorectal cancer is less prevalent.
+-   **Minimum Incidence**: On the other hand, the lowest incidence rate in 2019 was `r paste(min_incidence_country,", at", round(min_incidence_2019, 2))` cases per 100,000 people, showing areas where colorectal cancer is less prevalent.
 
 -   **Average Incidence**: The global average incidence of colorectal cancer in 2019 is `r paste(round(avg_incidence_2019, 2))`cases per 100,000 people, providing a reference point for comparing individual countries and regions.
 
